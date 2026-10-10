@@ -4,7 +4,7 @@
 
 ## الميزات
 
-- WebView كامل الشاشة لموقع tiktok.com بوضع متصفح موبايل.
+- WebView كامل الشاشة لموقع tiktok.com **بوضع الكمبيوتر (Desktop Mode)** — User Agent لمتصفح ويندوز كروم + عرض تخطيط 1280px مع دعم التكبير بالأصابع.
 - محرك No-Autoplay مدمج (JavaScript) + إعدادات أصلية `mediaPlaybackRequiresUserAction`:
   - تعطيل أي استدعاء `play()` من أكواد الموقع.
   - إزالة خاصية `autoplay` من كل فيديو حالي أو قادم.

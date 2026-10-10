@@ -103,14 +103,32 @@ function isTikTokUrl(url) {
   return ALLOWED_HOSTS.test(m[1]);
 }
 
-// User Agent لمتصفح موبايل حقيقي (بدون كلمة wv حتى لا يحجب الموقع الـ WebView)
-const USER_AGENT = Platform.select({
-  ios:
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
-  android:
-    'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-  default: undefined,
-});
+// User Agent لمتصفح كمبيوتر (ويندوز كروم) — يجبر الموقع على عرض واجهة الديسكتوب
+const USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+// فرض عرض تخطيط الكمبيوتر: نستبدل meta viewport بعرض 1280px
+// حتى يظهر تصميم الديسكتوب كاملاً مصغراً ليناسب الشاشة، مع السماح بالتكبير بالأصابع
+const DESKTOP_VIEWPORT_JS = `
+(function () {
+  function fixViewport() {
+    try {
+      var metas = document.querySelectorAll('meta[name="viewport"]');
+      for (var i = 0; i < metas.length; i++) { metas[i].remove(); }
+      var m = document.createElement('meta');
+      m.name = 'viewport';
+      m.content = 'width=1280, user-scalable=yes';
+      (document.head || document.documentElement).appendChild(m);
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixViewport);
+  } else {
+    fixViewport();
+  }
+})();
+true;
+`;
 
 export default function App() {
   const webRef = useRef(null);
@@ -174,10 +192,13 @@ export default function App() {
         mediaPlaybackRequiresUserAction
         allowsInlineMediaPlayback
         pullToRefreshEnabled
+        useWideViewPort
+        loadWithOverviewMode
+        setSupportZoom
         setSupportMultipleWindows={Platform.OS === 'android' ? false : true}
         allowsBackForwardNavigationGestures={Platform.OS === 'ios'}
         injectedJavaScriptBeforeContentLoaded={NO_AUTOPLAY_JS}
-        injectedJavaScript={NO_AUTOPLAY_JS}
+        injectedJavaScript={NO_AUTOPLAY_JS + '\n' + DESKTOP_VIEWPORT_JS}
         onNavigationStateChange={onNavigationStateChange}
         onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         onOpenWindow={onOpenWindow}
