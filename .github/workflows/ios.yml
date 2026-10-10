@@ -34,6 +34,16 @@ jobs:
           cd ios
           pod install
 
+      - name: Patch fmt for new Xcode consteval strictness (Xcode 26)
+        run: |
+          # fmt 11.0.2 (from RN 0.81) uses FMT_STRING() in format-inl.h which
+          # fails consteval checks on Apple clang shipped with Xcode 26.
+          # Replacing FMT_STRING("...") with plain literals is behavior-identical.
+          F="ios/Pods/fmt/include/fmt/format-inl.h"
+          sed -i '' -E 's/FMT_STRING\(("[^"]*")\)/\1/g' "$F"
+          echo "Remaining FMT_STRING occurrences (should be 0):"
+          grep -c 'FMT_STRING' "$F" || true
+
       - name: Archive (no code signing)
         run: |
           cd ios
